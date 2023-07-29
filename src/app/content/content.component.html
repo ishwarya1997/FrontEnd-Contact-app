@@ -1,0 +1,150 @@
+<div class="card">
+  <div class="card-body">
+    <button type="button" class="btn btn-secondary float-right" data-toggle="modal" 
+    (click)="resetForm()" data-target="#addContactModal">Add Contact</button>
+  </div>
+<div class="container">
+<table class="table p-3" style="width: 1200px;">
+  <thead class="thead-dark">
+    <tr>
+      <!-- Table headers -->
+      <th scope="col">First Name</th>
+      <th scope="col">Last Name</th>
+      <th scope="col">Email</th>
+      <th scope="col">Phone Number</th>
+      <th scope="col">Address</th>
+      <th scope="col">City</th>
+      <th scope="col">State</th>
+      <th scope="col">Country</th>
+      <th scope="col">Postal Code</th>
+      <th scope="col">Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <ng-container *ngIf="ContactList.length > 0; else noContacts">
+      <tr *ngFor="let contact of ContactList">
+        <td>{{ contact.firstName }}</td>
+        <td>{{ contact.lastName }}</td>
+        <td>{{ contact.email}}</td>
+        <td>{{ contact.phoneNumber }}</td>
+        <td>{{ contact.address }}</td>
+        <td>{{ contact.city }}</td>
+        <td>{{ contact.state }}</td>
+        <td>{{ contact.country }}</td>
+        <td>{{ contact.postalCode }}</td>
+        <td>
+          <div class="me-2 btnalign">
+            <i class="las la-pen" id="editicon" style="color: #A11F21;font-size: 25px;" (click)="editContact(contact)" data-toggle="modal" data-target="#addContactModal">
+            </i>
+            <i class="las la-trash-alt" id="icon" style="color: #A11F21;font-size: 25px;" (click)="deleteContact(contact)">
+            </i>
+          </div>
+         </td>
+      </tr>
+    </ng-container>
+    <ng-template #noContacts>
+      <tr >
+        <td colspan="10" style="font-size: 25px;color: #A11F21;">No contacts available.</td>
+      </tr>
+    </ng-template>
+  </tbody>
+</table>
+</div>
+</div>
+<!-- Add Contact Modal -->
+<div class="modal fade" id="addContactModal" tabindex="-1" role="dialog" aria-labelledby="addContactModalLabel" aria-hidden="true" [class.show]="modalOpen">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="addContactModalLabel">{{ isEditMode ? 'Edit Contact' : 'Add Contact' }}</h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="addContactForm" autocomplete="off" [formGroup]="addcontact" class="was-validated">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="firstName">First Name:</label>
+                <input type="text" formControlName="firstName" [ngModel]="selectedContact?.firstName || ''" maxlength="25" 
+                       class="form-control" id="firstName" name="firstName" required
+                       (keypress)="keyPressAlpha($event)">
+              </div>                        
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="lastName">Last Name:</label>
+                <input type="text" formControlName="lastName" [ngModel]="selectedContact?.lastName || ''" 
+                (keypress)="keyPressAlpha($event)" maxlength="10" class="form-control" id="lastName" name="lastName" required>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" formControlName="email" [ngModel]="selectedContact?.email || ''"  
+                 maxlength="50" class="form-control" id="email" name="email" required>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="phoneNumber">Phone Number:</label>
+                <input type="text" class="form-control" [ngModel]="selectedContact?.phoneNumber || ''" 
+                (keypress)="numberOnly($event)" maxlength="10" formControlName="phoneNumber" id="phoneNumber" name="phoneNumber" required>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="address">Address:</label>
+            <input type="text" class="form-control" id="address" [ngModel]="selectedContact?.address || ''" 
+            (keypress)="keyPressAlphanumeric($event)" maxlength="50" name="address" formControlName="address" required>
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="city">City:</label>
+                <input type="text" class="form-control" id="city" [ngModel]="selectedContact?.city || ''" 
+                (keypress)="keyPressAlphanumeric($event)" name="city" maxlength="25" formControlName="city" required>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="State">State:</label>
+                <select class="form-control" id="state" formControlName="state" [ngModel]="selectedContact?.state || ''">
+                  <option selected disabled value="">--Select State--</option>
+                  <option *ngFor="let state of stateList" [value]="state.name">{{ state.name }}</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="country">Country:</label>
+                <select class="form-control" id="country" formControlName="country" [ngModel]="selectedContact?.country || ''">
+                  <option selected disabled value="">--Select Country--</option>
+                  <option *ngFor="let country of countryList" [value]="country.name">{{ country.name }}</option>
+                </select>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="postalCode">Postal Code:</label>
+                <input type="text" class="form-control" id="postalCode" name="postalCode" maxlength="6"
+                (keypress)="numberOnly($event)" required formControlName="postalCode" [ngModel]="selectedContact?.postalCode || ''">
+              </div>
+            </div>
+          </div>
+         
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button *ngIf="!isEditMode" type="submit" class="btn btn-primary" [disabled]="addcontact.invalid" (click)="savedata()">Save</button>
+        <button *ngIf="isEditMode" type="submit" class="btn btn-secondary" [disabled]="addcontact.invalid" (click)="updateContact(addcontact)">Update</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
